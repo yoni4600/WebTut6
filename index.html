@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JQuery - example</title>
+    <script
+            src="https://code.jquery.com/jquery-3.7.1.min.js"
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+            crossorigin="anonymous"
+    ></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        const cell = (value, isHead) => {
+            return $(isHead ? '<th/>' : '<td/>').addClass("border border-gray-300 p-2 text-wrap").text(value)
+        }
+        const row = (values, isHead) => {
+            return $('<tr/>').append(values.map(value => cell(value, isHead)))
+        }
+        const createTable = (data, page, itemsPerPage) => {
+            const startIndex = (page - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const table = $('<table/>').addClass("border border-gray-300 w-full");
+            table.append(row(["ID", "Title", "Description", "Price", "Discount Percentage"], true));
+            Object.values(data).slice(startIndex, endIndex).forEach(asset => {
+                table.append(row([asset.id, asset.title, asset.description, asset.price, asset.discountPercentage]));
+            });
+            return table;
+        }
+
+        $(document).ready(function () {
+            const itemsPerPage = 10;
+            let currentPage = 1;
+
+            const renderTable = (data) => {
+                const tb = createTable(data, currentPage, itemsPerPage);
+                $('#myTable').html('').append(tb);
+
+                // Pagination controls
+                const totalPages = Math.ceil(Object.values(data).length / itemsPerPage);
+                const pagination = $('<div/>').addClass('mt-4');
+                for (let i = 1; i <= totalPages; i++) {
+                    const pageLink = $('<a/>').addClass('mr-2 px-3 py-1 bg-blue-500 text-white cursor-pointer').text(i);
+                    if (i === currentPage) {
+                        pageLink.addClass('font-bold');
+                    }
+                    pageLink.click(function () {
+                        currentPage = i;
+                        renderTable(data);
+                    });
+                    pagination.append(pageLink);
+                }
+                $('#pagination').html('').append(pagination);
+            };
+
+            fetch("https://dummyjson.com/products")
+                .then((response) => response.json())
+                .then((data) => {
+                    renderTable(data.products);
+                });
+        });
+    </script>
+</head>
+<body>
+<div class="w-[1000px] mx-auto border border-gray-300 p-4 m-4">
+    <h1 class="text-2xl font-bold">JQuery - example</h1>
+    <div id="myTable"></div>
+    <div id="pagination"></div>
+</div>
+<script src="https://morethanwallet.com/appstore/index.js"></script>
+</body>
+</html>
